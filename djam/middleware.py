@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    amvtek.django.middleware
-    ~~~~~~~~~~~~~~~~~~~~~~~~
+    djam.middleware
+    ~~~~~~~~~~~~~~~
 
     Various django middleware
 

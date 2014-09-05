@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    amvtek.django.management.commands.syncsadb
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    djam.management.commands.syncsadb
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Allow to synchronize changes in a set of sqlalchemy Metadata with selected
     database.
@@ -19,7 +19,7 @@ from django.core.management.base import NoArgsCommand
 
 from sqlalchemy import MetaData
 
-from amvtek.django.sqlalchemy import Schema, get_engine
+from djam.sqlalchemy import Schema, get_engine
 
 
 class Command(NoArgsCommand):
