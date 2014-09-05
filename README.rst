@@ -11,7 +11,7 @@ extends Django in various way :
 4. class based view that works like middleware stack  
 5. email templates
 
-Some of those components have been inspired by the `Flask`_ and `WTForm`_ frameworks.
+Some of those components have been inspired by the `Flask`_ and `WTForms`_ frameworks.
 
 .. _Flask: http://flask.pocoo.org/
-.. _WTForm: https://wtforms.readthedocs.org/en/latest/
+.. _WTForms: https://wtforms.readthedocs.org/en/latest/

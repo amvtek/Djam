@@ -10,6 +10,6 @@ setup(
     packages=['djam'],
     url='https://github.com/amvtek/Djam/',
     license='MIT',
-    description='Django application that simplify using the SqlAlchemy orm',
+    description='Extends Django to work with sqlalchemy and make it behave like Flask',
     long_description=open('README.rst').read(),
 )
