@@ -6,7 +6,7 @@
     Utilities that help defining 'phased' class based view
 
 
-    :copyright: (c) 2012 by sc AmvTek srl
+    :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
 
