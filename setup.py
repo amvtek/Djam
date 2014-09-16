@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='Djam',
-    version='0.8.1',
+    version='0.8.2',
     author='AmvTek developers',
     author_email='devel@amvtek.com',
     packages=['djam'],
