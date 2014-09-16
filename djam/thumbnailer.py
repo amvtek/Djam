@@ -32,7 +32,7 @@ class Thumbnailer(View):
     
     saveThumbnail = getattr(settings,'THUMBNAIL_SAVE',False)
     
-    lifetime = getattr(settings,'THUMBNAIL_CACHE_TIME', 900 #15 mn)
+    lifetime = getattr(settings,'THUMBNAIL_CACHE_TIME', 900 ) # 900 sec = 15 mn
     
     _parseThumbRegex = re.compile(r"\s*([0-9a-zA-Z/]+)-w(\d+)-h(\d+)\.(\w+)")
 
