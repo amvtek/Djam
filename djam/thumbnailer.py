@@ -11,11 +11,12 @@
 
 import re
 
-from PIL import Image, ImageOps # TODO: Allow using Pillow instead of PIL
+from PIL import Image, ImageOps
 
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.views.generic.base import View
 from django.http import HttpResponse, HttpResponseNotFound
 
 
