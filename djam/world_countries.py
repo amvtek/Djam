@@ -21,7 +21,7 @@ def guess_request_country(request):
     "Try to guess request country"
 
     # Option 01 : use GEOIP country
-    geoipCountry = request.META.get('HTTP_X_GEOIP_COUNTRY')
+    geoipCountry = request and request.META.get('HTTP_X_GEOIP_COUNTRY')
     if geoipCountry is not None:
         return geoipCountry
 
