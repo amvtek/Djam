@@ -12,6 +12,7 @@ import os, re, hashlib, threading, string
 from binascii import hexlify
 
 from django.conf import settings
+from django.utils.encoding import force_bytes, force_text
 
 class SharedStateBase(object):
     "Allow all instances to 'reliably' share variables"
@@ -34,6 +35,7 @@ class SharedStateBase(object):
 class SettingRename(object):
 
     def __init__(self, settingFmt):
+        
         self.settingFmt = settingFmt
 
     def __call__(self, name):
@@ -82,6 +84,7 @@ class FolderLoader(object):
 
 _STEPS = range(4, 0, -1)  # cache possible formatting steps
 _SEPARATORS = string.whitespace + "_-"
+translate = string.translate
 
 
 def r2h(rawId, sep=" "):
@@ -105,4 +108,5 @@ def h2r(humId):
     """
     remove formatting separators from readability enhanced identifier
     """
-    return humId.translate(None, _SEPARATORS)
+    
+    return force_text(translate(force_bytes(humId), None, _SEPARATORS))
