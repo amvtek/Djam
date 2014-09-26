@@ -10,6 +10,7 @@
 """
 
 import re
+from os.path import splitext
 
 from PIL import Image, ImageOps
 
@@ -18,6 +19,37 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.views.generic.base import View
 from django.http import HttpResponse, HttpResponseNotFound
+
+_parseThumbRegex = re.compile(r"\s*([0-9a-zA-Z/]+)-w(\d+)-h(\d+)\.(\w+)")
+
+def parse_thumbnail_infos(filename):
+    "return mastername,extension,(width,height)..."
+
+    m = _parseThumbRegex.match(filename)
+
+    if m is not None:
+        mastername = "%s.%s" % (m.group(1), m.group(4))
+        extension = m.group(4)
+        size = (int(m.group(2)), int(m.group(3)))
+        return mastername, extension, size
+
+
+def build_thumbnail_path(mpath, width, height=None):
+    "return path encoding thumbnail dimensions"
+
+    # validate dimensions
+    width = int(width)
+    height = int(height or width)
+
+    # extracts basename, extension from mpath
+    m = _parseThumbRegex.match(mpath)
+    if m is not None:
+        basename = m.group(1)
+        extension = ".%s" % m.group(4)
+    else:
+        basename, extension = splitext(mpath)
+
+    return "%(basename)s-w%(width)i-h%(height)i%(extension)s" % locals()
 
 
 class Thumbnailer(View):
@@ -35,18 +67,6 @@ class Thumbnailer(View):
     
     lifetime = getattr(settings,'THUMBNAIL_CACHE_TIME', 900 ) # 900 sec = 15 mn
     
-    _parseThumbRegex = re.compile(r"\s*([0-9a-zA-Z/]+)-w(\d+)-h(\d+)\.(\w+)")
-
-    def parse_thumbnail_infos(self, filename):
-        "return mastername,extension,(width,height)..."
-
-        m = self._parseThumbRegex.match(filename)
-
-        if m is not None:
-            mastername = "%s.%s" % (m.group(1), m.group(4))
-            extension = m.group(4)
-            size = (int(m.group(2)), int(m.group(3)))
-            return mastername, extension, size
 
     def get(self, request, path):
 
@@ -61,7 +81,7 @@ class Thumbnailer(View):
             return resp
 
         # if file not in storage it may encode thumbnail dimensions
-        rv = self.parse_thumbnail_infos(filename)
+        rv = parse_thumbnail_infos(filename)
         if rv is None:
             return HttpResponseNotFound()
         mastername, ext, targetSize = rv
