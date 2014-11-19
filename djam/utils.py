@@ -8,8 +8,11 @@
 """
 
 import os, re, hashlib, threading, string
-
 from binascii import hexlify
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 from django.conf import settings
 from django.utils.encoding import force_bytes, force_text

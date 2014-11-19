@@ -102,14 +102,14 @@ class PhasedRequestProcessingMeta(type):
         return super(PhasedRequestProcessingMeta, meta).__new__(meta, name, bases, attrs)
 
 
-class BaseApiRessource(View):
+class BaseApiResource(View):
     """
-    REST api ressource base class
+    REST api resource base class
     """
 
     __metaclass__ = PhasedRequestProcessingMeta
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
-        return super(BaseApiRessource, self).dispatch(*args, **kwargs)
+        return super(BaseApiResource, self).dispatch(*args, **kwargs)
     
