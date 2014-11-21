@@ -26,7 +26,7 @@ from django.conf import settings
 from .utils import SettingRename
 from ._django_to_sqlalchemy import _DJ2SA, _PARAMS
 
-__all__ = ['Session', 'SqlAlchemyMiddleware', 'get_db_session', 'get_engine']
+__all__ = ['Session', 'SqlAlchemyMiddleware', 'object_session', 'get_db_session', 'get_engine']
 
 # ============================================================================
 # Configure database Session class
@@ -36,6 +36,8 @@ if Session is None:
     Session = scoped_session(sessionmaker())
 if not isinstance(Session, ScopedSession):
     Session = scoped_session(Session)
+
+object_session = Session.object_session
 
 # ============================================================================
 # SqlAlchemyMiddleware shall be activated for sqlalchemy Session to be properly
