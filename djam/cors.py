@@ -121,14 +121,34 @@ class CORSMiddleware(object):
         if sopts:
             opts.update(sopts)
 
+        #
         # update using view cors_policy
-        vopts = getattr(view, 'cors_policy', None) or {}
-        if 'allow_methods' not in vopts:
-            # use view http_method_names if it is set
-            methods = getattr(view,'http_method_names',None)
+
+        vopts = getattr(view,'cors_policy',None) or {}
+        cbv = None
+
+        if getattr(view, '__closure__', None) :
+            
+            # view may be what CBV.as_view() returns
+            # we try to retrieve CBV class & initkwargs
+            # unfortunately django does not provide straight access to those
+            # this approach is fragile (it rely on django inner variable names)
+            ctx = dict(zip(
+                view.__code__.co_freevars,
+                [c.cell_contents for c in (view.__closure__ or [])]
+                )
+                )
+            cbvargs = ctx.get('initkwargs') or {}
+
+            cbv = ctx.get('cls')
+            vopts = vopts or cbvargs.get('cors_policy') or\
+                    getattr(cbv,'cors_policy',vopts)
+
+        if ('allow_methods' not in vopts) and cbv :
+            methods = getattr(cbv, 'http_method_names', None)
             if methods:
-                # upper case methods names
                 vopts['allow_methods'] = [m.upper() for m in methods]
+        
         opts.update(vopts)
 
         return opts
@@ -165,6 +185,7 @@ class CORSMiddleware(object):
         # optionally process OPTIONS request assuming they are preflight
         if request.method == 'OPTIONS':
 
+
             # retrieve preflighted method & abort if it is not set
             prfM = request.META.get('HTTP_ACCESS_CONTROL_REQUEST_METHOD')
             if prfM is None:
@@ -172,7 +193,7 @@ class CORSMiddleware(object):
 
             # abort if preflighted method is not allowed
             # W3C spec call for case sensitive match
-            allowed_methods = set(cors.get('allowed_method') or [])
+            allowed_methods = set(cors.get('allow_methods') or [])
             if prfM not in allowed_methods:
                 return
 
@@ -188,7 +209,7 @@ class CORSMiddleware(object):
                 prfH.remove('')
 
             # retrieve & normalize list of allowed headers
-            alwdH = cors.get('allowed_headers') or []
+            alwdH = cors.get('allow_headers') or []
             if alwdH == '*':
                 alwdH = prfH
             else:
@@ -201,7 +222,7 @@ class CORSMiddleware(object):
                 return
 
             # add Access-Control-Allow-Headers to cors_headers
-            cors_headers.append('Access-Control-Allow-Headers',",".join(prfH))
+            cors_headers.append(('Access-Control-Allow-Headers',",".join(prfH)))
 
             # optionally add Access-Control-Max-Age to cors_headers
             maxage = cors.get('max_age')
