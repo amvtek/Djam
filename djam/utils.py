@@ -83,6 +83,35 @@ class FolderLoader(object):
         f = open(os.path.join(self.baseFolder, filename), 'r')
         return f.read()
 
+def get_cbv_object(viewfunc):
+    """
+    If viewfunc has been obtained using CBV.as_view(**initkwargs) factory
+    returns instance of CBV that viewfunc will construct each time it is called
+    """
+    
+    if getattr(viewfunc, '__closure__', None) is None:
+        # viewfunc has not been constructed using CBV
+        return
+
+    try:
+        
+        # We assume that viewfunc was returned by CBV.as_view(**initkwargs)
+        # we try to retrieve CBV class & initkwargs
+        #
+        # this approach is **fragile** as it rely on inner variable names, 
+        # used in base as_view implementation
+        ctx = dict(zip(view.__code__.co_freevars,
+            [c.cell_contents for c in (view.__closure__ or [])]
+            ))
+        initkwargs = ctx.get('initkwargs') or {}
+        CBV = ctx.get('cls')
+        
+        if callable(CBV):
+            return CBV(**initkwargs)
+
+    except:
+
+        return None
 
 
 _STEPS = range(4, 0, -1)  # cache possible formatting steps

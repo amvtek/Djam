@@ -12,6 +12,8 @@
 from django.conf import settings
 from django.http import HttpResponse
 
+from .utils import get_cbv_object
+
 # See : http://www.w3.org/TR/cors/#simple-method
 CORS_SIMPLE_METHODS = frozenset(['GET', 'HEAD', 'POST'])
 
@@ -121,30 +123,13 @@ class CORSMiddleware(object):
         if sopts:
             opts.update(sopts)
 
-        #
         # update using view cors_policy
+        
+        pn = 'cors_policy' # local alias
+        cbvobj = get_cbv_object(view)
 
-        vopts = getattr(view,'cors_policy',None) or {}
-        cbv = None
-
-        if getattr(view, '__closure__', None) :
-            
-            # view may be what CBV.as_view() returns
-            # we try to retrieve CBV class & initkwargs
-            # unfortunately django does not provide straight access to those
-            # this approach is fragile (it rely on django inner variable names)
-            ctx = dict(zip(
-                view.__code__.co_freevars,
-                [c.cell_contents for c in (view.__closure__ or [])]
-                )
-                )
-            cbvargs = ctx.get('initkwargs') or {}
-
-            cbv = ctx.get('cls')
-            vopts = vopts or cbvargs.get('cors_policy') or\
-                    getattr(cbv,'cors_policy',vopts)
-
-        if ('allow_methods' not in vopts) and cbv :
+        vopts = getattr(view, pn, None) or getattr(cbvobj, pn, None) or {}
+        if cbvobj and 'allow_methods' not in vopts:
             methods = getattr(cbv, 'http_method_names', None)
             if methods:
                 vopts['allow_methods'] = [m.upper() for m in methods]
