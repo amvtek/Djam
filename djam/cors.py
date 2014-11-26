@@ -130,7 +130,7 @@ class CORSMiddleware(object):
 
         vopts = getattr(view, pn, None) or getattr(cbvobj, pn, None) or {}
         if cbvobj and 'allow_methods' not in vopts:
-            methods = getattr(cbv, 'http_method_names', None)
+            methods = getattr(cbvobj, 'http_method_names', None)
             if methods:
                 vopts['allow_methods'] = [m.upper() for m in methods]
         
