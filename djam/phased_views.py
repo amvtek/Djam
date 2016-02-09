@@ -6,9 +6,11 @@
     Utilities that help defining 'phased' class based view
 
 
-    :copyright: (c) 2014 by sc AmvTek srl
+    :copyright: (c) sc AmvTek srl
     :email: devel@amvtek.com
 """
+
+import re, json
 
 from django.http import HttpResponse
 from django.views.generic import View
@@ -112,4 +114,12 @@ class BaseApiResource(View):
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(BaseApiResource, self).dispatch(*args, **kwargs)
+
+    _is_json = staticmethod(re.compile('/json').search)
     
+    def load_json(self, request):
+        "optionally deserialize request encoding json object in POST"
+
+        contenttype = request.META.get("CONTENT_TYPE","")
+        if self._is_json(contenttype) and not request.POST:
+            request.POST = json.loads(request.body) 
