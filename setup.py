@@ -7,7 +7,7 @@ setup(
     version='0.9.1',
     author='AmvTek developers',
     author_email='devel@amvtek.com',
-    licence='MIT',
+    license='MIT',
     packages=find_packages(),
     url='https://github.com/amvtek/Djam/',
     description='Extends Django to work with sqlalchemy and make it behave like Flask',
