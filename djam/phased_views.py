@@ -48,7 +48,7 @@ class PhasedRequestProcessingMeta(type):
 
         phaseList = "_{0}Phases".format(verb)
 
-        def phased_handler(view, request):
+        def phased_handler(view, request, *args, **kwargs):
 
             handlers = getattr(view, phaseList)
 
