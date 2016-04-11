@@ -34,14 +34,28 @@ class PhasedRequestProcessingMeta(type):
         "raised in case we are unable to resolve handler name to a callable..."
         pass
 
+    
     @classmethod
-    def lookup(meta, name, dicos):
-        "search name in sequence of dictionary dicos..."
+    def make_lookup(meta, bases, attrs):
+        "return lookup callable"
 
-        for dic in dicos:
-            value = dic.get(name)
-            if value is not None:
-                return value
+        MISSING = object()
+
+        def lookup(name):
+
+            # search in attrs dict
+            rv = attrs.get(name, MISSING)
+            if rv != MISSING:
+                return rv
+
+            # search in bases
+            for base in bases:
+                rv = getattr(base, name, MISSING)
+                if rv != MISSING:
+                    return rv
+
+        return lookup
+
 
     @classmethod
     def build_phased_request_handler(meta, verb):
@@ -66,22 +80,21 @@ class PhasedRequestProcessingMeta(type):
 
     def __new__(meta, name, bases, attrs):
 
-        # build lookup list...
-        dicos = [attrs]
-        dicos.extend([b.__dict__ for b in bases])
+        # build lookup func
+        lookup = meta.make_lookup(bases, attrs)
 
-        defaultPhases = meta.lookup('PHASES', dicos)
+        defaultPhases = lookup('PHASES')
 
         for verb in View.http_method_names:
 
             # retrieve verb phases if set...
             param = "{0}_PHASES".format(verb.upper())
-            verbPhases = meta.lookup(param, dicos) or defaultPhases
+            verbPhases = lookup(param) or defaultPhases
 
             if verbPhases is not None:
 
                 # generates verb handler if not set...
-                verbHandler = meta.lookup(verb, dicos)
+                verbHandler = lookup(verb)
                 if verbHandler is None:
                     attrs[verb] = meta.build_phased_request_handler(verb)
 
@@ -92,10 +105,10 @@ class PhasedRequestProcessingMeta(type):
                     if callable(phase):
                         l.append(phase)
                     else:
-                        phaseFunc = meta.lookup(phase, dicos)
+                        phaseFunc = lookup(phase)
                         if not callable(phaseFunc):
                             errMsg = "missing callable for phase %s in %s" % \
-                                     (phaseFunc, verb)
+                                     (phase, verb)
                             raise meta.UnknownCallable(errMsg)
                         l.append(phaseFunc)
                 attrs[lname] = l
@@ -116,10 +129,34 @@ class BaseApiResource(View):
         return super(BaseApiResource, self).dispatch(*args, **kwargs)
 
     _is_json = staticmethod(re.compile('/json').search)
-    
-    def load_json(self, request):
-        "optionally deserialize request encoding json object in POST"
 
-        contenttype = request.META.get("CONTENT_TYPE","")
-        if self._is_json(contenttype) and not request.POST:
-            request.POST = json.loads(request.body) 
+    def load_body(self, request):
+        """
+        deserialize request.body in request.POST & request.FILES
+        """
+
+        if not (request.POST or request.FILES):
+
+            contenttype = request.META.get("CONTENT_TYPE","")
+            
+            if self._is_json(contenttype):
+
+                request.POST = json.loads(request.body)
+
+            elif request.method != 'POST':
+
+                # save actual method (eg PUT...)
+                method = request.method
+
+                try:
+
+                    # trick Django in believing this is a POST
+                    request.method = 'POST'
+                    request._load_post_and_files()
+
+                finally:
+
+                    # restore method
+                    request.method = method
+
+    load_json = load_body
