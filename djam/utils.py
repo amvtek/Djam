@@ -6,17 +6,13 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division
 
 import os, re, hashlib, threading, string
 from binascii import hexlify
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
 
 from django.conf import settings
-from django.utils.encoding import force_bytes, force_text
+from django.utils import six
 
 class SharedStateBase(object):
     "Allow all instances to 'reliably' share variables"
@@ -117,7 +113,6 @@ def get_cbv_object(viewfunc):
 
 _STEPS = range(4, 0, -1)  # cache possible formatting steps
 _SEPARATORS = string.whitespace + "_-"
-translate = string.translate
 
 def r2h(rawId, sep=" "):
     """
@@ -131,14 +126,26 @@ def r2h(rawId, sep=" "):
             break
     if s == 1:
         return rId
-    buf = StringIO(rId)
-    parts = [buf.read(s) for i in xrange(lId / s)]
+    buf = six.StringIO(rId)
+    parts = [buf.read(s) for i in range(lId // s)]
     return sep.join(parts)
 
-
-def h2r(humId):
-    """
-    remove formatting separators from readability enhanced identifier
-    """
+if six.PY2:
     
-    return force_text(translate(force_bytes(humId), None, _SEPARATORS))
+    from django.utils.encoding import force_bytes, force_text
+
+    translate = string.translate
+    
+    def h2r(humId):
+        """
+        remove formatting separators from readability enhanced identifier
+        """
+        
+        return force_text(translate(force_bytes(humId), None, _SEPARATORS))
+
+else:
+
+    # TODO: works on Python 3 support...
+    def h2r(humId):
+
+        raise NotImplementedError("no implementation for Python 3")
