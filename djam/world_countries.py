@@ -8,12 +8,13 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
+from __future__ import unicode_literals, absolute_import
 
 from django.conf import settings
 from django import forms
 from django.utils.translation import get_language
 
-from global_request import get_request
+from .global_request import get_request
 
 DEFAULT_COUNTRY = getattr(settings, 'DEFAULT_COUNTRY', 'US')
 

@@ -6,6 +6,7 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
+from __future__ import unicode_literals
 
 import os, re, hashlib, threading, string
 from binascii import hexlify
@@ -117,7 +118,6 @@ def get_cbv_object(viewfunc):
 _STEPS = range(4, 0, -1)  # cache possible formatting steps
 _SEPARATORS = string.whitespace + "_-"
 translate = string.translate
-
 
 def r2h(rawId, sep=" "):
     """

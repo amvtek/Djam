@@ -9,6 +9,7 @@
     :copyright: (c) sc AmvTek srl
     :email: devel@amvtek.com
 """
+from __future__ import unicode_literals
 
 import re, json
 
@@ -16,6 +17,7 @@ from django.http import HttpResponse
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.utils import six
 
 class PhasedRequestProcessingMeta(type):
     """
@@ -117,12 +119,10 @@ class PhasedRequestProcessingMeta(type):
         return super(PhasedRequestProcessingMeta, meta).__new__(meta, name, bases, attrs)
 
 
-class BaseApiResource(View):
+class BaseApiResource(six.with_metaclass(PhasedRequestProcessingMeta, View)):
     """
     REST api resource base class
     """
-
-    __metaclass__ = PhasedRequestProcessingMeta
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):

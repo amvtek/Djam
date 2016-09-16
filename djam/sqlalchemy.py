@@ -8,9 +8,7 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
-
-# allows this module to be called sqlalchemy...
-from __future__ import absolute_import
+from __future__ import unicode_literals, absolute_import
 
 import threading
 

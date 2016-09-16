@@ -9,6 +9,8 @@
     :copyright: (c) 2010 by sc AmvTek srl
     :email: devel@amvtek.com
 """
+from __future__ import unicode_literals
+
 import re
 import string
 
@@ -29,8 +31,8 @@ class EmailTemplate(object):
     ---------------
 
     WelcomeEmail = EmailTemplate(
-                        subjectTpl = _(u"Welcome $fname $lname"),
-                        fromUser = _(u"$fname $lname via $serviceName"),
+                        subjectTpl = _("Welcome $fname $lname"),
+                        fromUser = _("$fname $lname via $serviceName"),
                         textTpl = "emails/welcome.txt",
                         htmlTpl = "emails/welcome.html"
                         )
@@ -43,12 +45,12 @@ class EmailTemplate(object):
 
     ...later on
 
-    msg = WelcomeEmail([u"user@example.com"],fname=u"test",lname=u"user")
+    msg = WelcomeEmail(["user@example.com"],fname="test",lname="user")
     ...
     msg.send()
     """
 
-    STR_TPL_REGEX = re.compile(ur"\$")
+    STR_TPL_REGEX = re.compile(r"\$")
 
     def __init__(
             self, subjectTpl, textTpl,

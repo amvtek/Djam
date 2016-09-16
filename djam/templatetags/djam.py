@@ -6,6 +6,7 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
+from __future__ import unicode_literals, absolute_import
 
 from django import template
 from django.core.urlresolvers import reverse
@@ -25,6 +26,3 @@ def thumbnail(context, mpath, width, height=None):
     thumbpath = build_thumbnail_path(mpath, width, height)
 
     return reverse(thumbnailer_view, args=(thumbpath,))
-
-
-

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Djam',
-    version='0.9.2',
+    version='0.9.3',
     author='AmvTek developers',
     author_email='devel@amvtek.com',
     license='MIT',
@@ -22,6 +22,9 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Internet :: WWW/HTTP',
     ],
 )

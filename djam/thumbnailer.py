@@ -8,6 +8,7 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
+from __future__ import unicode_literals
 
 import re
 from os.path import splitext

@@ -6,14 +6,14 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
-
-from __future__ import absolute_import
+from __future__ import unicode_literals, absolute_import
 
 import json, string
 from urlparse import urljoin
 
 from cStringIO import StringIO
 
+from django.utils.encoding import python_2_unicode_compatible
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -115,6 +115,7 @@ class _MessageFlasher(SharedStateBase):
 flash = _MessageFlasher()
 
 
+@python_2_unicode_compatible
 class MessageBuffer(list):
     """
     _MessageFlasher helper allowing to construct a multiline message
@@ -131,10 +132,10 @@ class MessageBuffer(list):
 
     level = property(get_level, set_level)
 
-    def __repr__(self):
+    def __str__(self):
         "return html multiline representation"
 
-        return u"<br/>".join([l for l in self]).encode('utf-8')
+        return "<br/>".join([l for l in self])
 
 
 def url_for(viewname, absolute=False, topurl=None, **reverseargs):

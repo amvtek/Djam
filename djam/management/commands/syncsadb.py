@@ -9,6 +9,7 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
+from __future__ import unicode_literals
 
 from optparse import make_option
 import inspect
@@ -75,4 +76,3 @@ class Command(NoArgsCommand):
         for metadata in metadatas:
             print("now synchronizing %s" % metadata)
             metadata.create_all(bind=engine)
-

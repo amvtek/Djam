@@ -9,6 +9,7 @@
     :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
+from __future__ import unicode_literals
 
 from copy import copy
 from collections import Iterable
@@ -175,6 +176,6 @@ def fieldset_factory(fieldsets, prefix_init=None):
                                 f.populate_obj(obj, *attrs)
 
         def __repr__(self):
-            return u"<FiedSetForm%s>" % str(tuple(self._fieldsets.keys()))
+            return "<FiedSetForm%s>" % str(tuple(self._fieldsets.keys()))
 
     return FSForm
