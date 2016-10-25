@@ -13,7 +13,7 @@ from __future__ import unicode_literals
 
 import re, json
 
-from django.http import HttpResponse
+from django.http.response import HttpResponseBase
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -71,7 +71,7 @@ class PhasedRequestProcessingMeta(type):
             resp = request
             for handler in handlers:
                 resp = handler(view, resp) or resp
-                if isinstance(resp, HttpResponse):
+                if isinstance(resp, HttpResponseBase):
                     return resp
 
         # add documentation
