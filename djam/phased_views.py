@@ -17,6 +17,7 @@ from django.http.response import HttpResponseBase
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.utils.encoding import smart_text
 from django.utils import six
 
 class PhasedRequestProcessingMeta(type):
@@ -141,7 +142,7 @@ class BaseApiResource(six.with_metaclass(PhasedRequestProcessingMeta, View)):
             
             if self._is_json(contenttype):
 
-                request.POST = json.loads(request.body)
+                request.POST = json.loads(smart_text(request.body))
 
             elif request.method != 'POST':
 
