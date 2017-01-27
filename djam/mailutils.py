@@ -13,10 +13,12 @@ from __future__ import unicode_literals
 
 import re
 import string
+from email.mime.image import MIMEImage
 
 from django.template import Context
 from django.template.loader import get_template
 from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.utils.encoding import force_text
 from django.utils import translation
 
 
@@ -55,8 +57,8 @@ class EmailTemplate(object):
     def __init__(
             self, subjectTpl, textTpl,
             htmlTpl=None, toAddresses=None, fromAddress=None,
-            fromUser=None, replyToAddress=None, docAttachments=None,
-            lang=None):
+            fromUser=None, replyToAddress=None, lang=None,
+            docAttachments=None, inlineImages=None):
 
         self.subjectTpl = subjectTpl  # expected to be ugettext_lazy processed...
         self.fromUser = fromUser  # expected to be ugettext_lazy processed...
@@ -72,11 +74,33 @@ class EmailTemplate(object):
             self.htmlTpl = None
             self.msg_factory = EmailMessage
 
+        # preload inline images if any
+        if inlineImages:
+            inlines = []
+            for inline in inlineImages:
+                if callable(inline):
+                    inlines.append(inline)
+                else:
+                    inline.append(self.load_inline_image(*inline))
+            inlineImages = inlines
+
         self.toAddresses = toAddresses
         self.fromAddress = fromAddress
         self.replyToAddress = replyToAddress
         self.docAttachments = docAttachments
-        self.lang = None  # freeze email language code, usefull for admin...
+        
+        # preload inline images if any
+        if inlineImages:
+            inlines = []
+            for inline in inlineImages:
+                if callable(inline):
+                    inlines.append(inline)
+                else:
+                    inline.append(self.load_inline_image(*inline))
+            inlineImages = inlines
+        self.inlineImages = inlineImages
+
+        self.lang = lang  # freeze email language code, usefull for admin...
 
     def render_param(self, paramTplString, cacheable, kwargs):
 
@@ -90,6 +114,15 @@ class EmailTemplate(object):
             paramTpl = string.Template(paramTplString)
 
         return paramTpl.substitute(kwargs)
+
+    def load_inline_image(self, name, binary):
+        "return MIMEImage suitable for email embedding"
+
+        rv = MIMEImage(binary)
+        rv.add_header('Content-ID', "<{}>".format(name))
+
+        return rv
+
 
     def __call__(self, toAddresses=None, fromAddress=None, fromUser=None,
                  replyToAddress=None, subject=None, lang=None, **kwargs):
@@ -125,14 +158,14 @@ class EmailTemplate(object):
 
             # Render title
             # if ugettext_lazy was used, this shall translate it
-            subject = unicode(subject)
+            subject = force_text(subject)
             if self.STR_TPL_REGEX.search(subject):
                 subject = self.render_param(subject, cacheSubjectTpl, kwargs)
 
             # Update fromAddress if fromUser is set
             if fromUser is not None:
                 # if ugettext_lazy was used, this shall translate it
-                fromUser = unicode(fromUser)
+                fromUser = force_text(fromUser)
                 if self.STR_TPL_REGEX.search(fromUser):
                     fromUser = self.render_param(
                         fromUser, cacheFromUserTpl, kwargs
@@ -158,18 +191,37 @@ class EmailTemplate(object):
                 to=toAddresses, headers=hdrs
             )
 
-            # add file attachments
-            # those shows as attached documents in msg...
-            if self.docAttachments:
-                for attachment in self.docAttachments:
-                    # attachment callable shall return a 3-tuple containing
-                    # attachment_name, attachment_bytes, attachment_mime_type
-                    msg.attach(*attachment(**kwargs))
-
             # Add html alternative
             if self.htmlTpl:
                 htmlPart = self.htmlTpl.render(ctx)
                 msg.attach_alternative(htmlPart, "text/html")
+            
+            # add inline images
+            if self.inlineImages:
+                
+                if self.htmlTpl:
+                    msg.mixed_subtype = 'related'
+
+                for inline in self.inlineImages:
+
+                    if callable(inline):
+                        # inline callable shall return a 2-tuple containing
+                        # inline_name, inline_bytes
+                        inline = self.load_inline_image(*inline(**kwargs))
+                    
+                    msg.attach(inline)
+
+            # add file attachments
+            # those shows as attached documents in msg...
+            if self.docAttachments:
+                for attachment in self.docAttachments:
+
+                    if callable(attachment):
+                        # attachment callable shall return a 3-tuple containing
+                        # attachment_name, attachment_bytes, attachment_mime_type
+                        attachment = attachment(**kwargs)
+                    
+                    msg.attach(*attachment)
 
             return msg
 
