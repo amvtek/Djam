@@ -5,7 +5,6 @@
 
     Various django middleware
 
-    :copyright: (c) 2013 by sc AmvTek srl
     :email: devel@amvtek.com
 """
 from __future__ import unicode_literals, absolute_import

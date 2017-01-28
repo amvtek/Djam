@@ -6,7 +6,6 @@
     Improve (slightly) django Form to ease working with objects that are not
     django models...
 
-    :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
 from __future__ import unicode_literals

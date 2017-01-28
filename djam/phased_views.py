@@ -6,7 +6,6 @@
     Utilities that help defining 'phased' class based view
 
 
-    :copyright: (c) sc AmvTek srl
     :email: devel@amvtek.com
 """
 from __future__ import unicode_literals

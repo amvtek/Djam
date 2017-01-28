@@ -5,7 +5,6 @@
 
     middleware that helps supporting W3C Cross-Origin Resource Sharing
 
-    :copyright: (c) 2014 by sc AmvTek srl
     :email: devel@amvtek.com
 """
 from __future__ import unicode_literals, absolute_import
