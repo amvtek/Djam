@@ -26,7 +26,7 @@ class InlineImage(MIMEImage):
     """
 
     def __init__(self, name, binary):
-        super(InlineImage, self).__init__(force_bytes(binary))
+        MIMEImage.__init__(self, force_bytes(binary))
         self.add_header('Content-ID', "<{}>".format(name))
 
 class EmailTemplate(object):
