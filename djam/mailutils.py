@@ -6,7 +6,6 @@
     Export EmailTemplate class that simplifies integrating email messaging to a
     Django application
 
-    :copyright: (c) 2010 by sc AmvTek srl
     :email: devel@amvtek.com
 """
 from __future__ import unicode_literals
@@ -18,9 +17,17 @@ from email.mime.image import MIMEImage
 from django.template import Context
 from django.template.loader import get_template
 from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.utils.encoding import force_text
+from django.utils.encoding import force_text, force_bytes
 from django.utils import translation
 
+class InlineImage(MIMEImage):
+    """
+    A MIMEImage suitable for 'cid' embedding
+    """
+
+    def __init__(self, name, binary):
+        super(InlineImage, self).__init__(force_bytes(binary))
+        self.add_header('Content-ID', "<{}>".format(name))
 
 class EmailTemplate(object):
     """
@@ -29,8 +36,8 @@ class EmailTemplate(object):
     the django i18n middleware or directly by setting explicitely a language
     parameter.
 
-    example of use:
-    ---------------
+    Example :
+    ---------
 
     WelcomeEmail = EmailTemplate(
                         subjectTpl = _("Welcome $fname $lname"),
@@ -50,6 +57,50 @@ class EmailTemplate(object):
     msg = WelcomeEmail(["user@example.com"],fname="test",lname="user")
     ...
     msg.send()
+    
+    Parameters
+    ----------
+    subjectTpl : str or lazy_gettext...
+     string template (using $ variable substitution ) defining email
+     subject.
+
+    textTpl : str
+     path to django text template
+     shall always be defined even if an html template is also provided
+
+    htmlTpl : optional str
+     path to django html template
+
+    toAddresses : optional List[email]
+     default list of destinary
+     when message is rendered, this list may be overwritten
+
+    fromAddress : optional email
+     default sender address
+     when message is rendered, this address may be overwritten
+
+    fromUser : optional str or lazy_gettext
+     default sender name (maybe internationalized)
+     when message is rendered, this name may be overwritten
+    
+    replyToAddress : optional email
+     set message reply to address
+     when message is rendered, this address may be overwritten
+
+    lang : optional str
+     allows forcing email language to another than what HTTP request provides.
+     This is usefull when sending notification messages
+
+    docAttachments : optional List[(name, bytes, mimetype) or callable]
+     callable allows templating message attachment (eg pdf invoice generation).
+     They accept any number of keywords arguments.
+
+    inlineImages : optional List[(name, bytes) or callable]
+     inlines can be referenced in the html part of the message using img tag
+     with "cid:name" source...
+     callable allows templating inline image (eg barcode generation).
+     They accept any number of keywords arguments and return (name, bytes)
+     tuple.
     """
 
     STR_TPL_REGEX = re.compile(r"\$")
@@ -74,16 +125,6 @@ class EmailTemplate(object):
             self.htmlTpl = None
             self.msg_factory = EmailMessage
 
-        # preload inline images if any
-        if inlineImages:
-            inlines = []
-            for inline in inlineImages:
-                if callable(inline):
-                    inlines.append(inline)
-                else:
-                    inline.append(self.load_inline_image(*inline))
-            inlineImages = inlines
-
         self.toAddresses = toAddresses
         self.fromAddress = fromAddress
         self.replyToAddress = replyToAddress
@@ -96,7 +137,7 @@ class EmailTemplate(object):
                 if callable(inline):
                     inlines.append(inline)
                 else:
-                    inline.append(self.load_inline_image(*inline))
+                    inlines.append(InlineImage(*inline))
             inlineImages = inlines
         self.inlineImages = inlineImages
 
@@ -114,15 +155,6 @@ class EmailTemplate(object):
             paramTpl = string.Template(paramTplString)
 
         return paramTpl.substitute(kwargs)
-
-    def load_inline_image(self, name, binary):
-        "return MIMEImage suitable for email embedding"
-
-        rv = MIMEImage(binary)
-        rv.add_header('Content-ID', "<{}>".format(name))
-
-        return rv
-
 
     def __call__(self, toAddresses=None, fromAddress=None, fromUser=None,
                  replyToAddress=None, subject=None, lang=None, **kwargs):
@@ -207,7 +239,7 @@ class EmailTemplate(object):
                     if callable(inline):
                         # inline callable shall return a 2-tuple containing
                         # inline_name, inline_bytes
-                        inline = self.load_inline_image(*inline(**kwargs))
+                        inline = InlineImage(*inline(**kwargs))
                     
                     msg.attach(inline)
 
