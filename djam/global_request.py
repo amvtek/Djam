@@ -8,9 +8,8 @@
 from __future__ import unicode_literals, absolute_import
 
 import json, string
-from urlparse import urljoin
 
-from cStringIO import StringIO
+from django.utils.six.moves.urllib.parse import urlparse
 
 from django.utils.encoding import python_2_unicode_compatible
 from django.contrib import messages
