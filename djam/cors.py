@@ -113,6 +113,9 @@ class CORSMiddleware(object):
         'max_age': 0,
     }
 
+    def __init__(self, get_response=None):
+        self.get_response = get_response
+
     def get_cors_policy(self, view):
         "return cors_policy dictionary"
 
@@ -239,3 +242,14 @@ class CORSMiddleware(object):
                 response[hdr] = val
 
         return response
+
+    def __call__(self, request):
+        "django >= 1.10 middleware entry point"
+
+        # TODO: 
+        # django >= 1.10 keep on calling process_view 
+        # so normally get_response accounts for process_view (not tested yet)
+
+        response = self.get_response(request)
+
+        return self.process_response(request, response)

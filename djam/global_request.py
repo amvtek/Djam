@@ -37,14 +37,30 @@ class GlobalRequestMiddleware(SharedStateBase):
         have a 'process_request' method that can return an HttpResponse...
     """
 
+    def __init__(self, get_response=None):
+
+        SharedStateBase.__init__(self)
+        self.get_response = get_response
+
     def process_request(self, request):
 
         # record request in application shared state
-
         self._local.request = request
 
     def process_response(self, request, response):
+
         self._local.request = None
+        return response
+
+    def __call__(self, request):
+        "django >= 1.10 middleware entry point"
+
+        self.process_request(request)
+
+        response = self.get_response(request)
+
+        self.process_response(request, response)
+
         return response
 
 

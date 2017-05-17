@@ -12,7 +12,7 @@ from __future__ import unicode_literals, absolute_import
 from django.conf import settings
 from django.core.exceptions import MiddlewareNotUsed
 
-def InstallJavascriptCatalog():
+def InstallJavascriptCatalog(get_response=None):
     """
     Middleware ensuring that 'django.views.i18n.javascript_catalog' is wired.
     This middleware can be configured using settings :
