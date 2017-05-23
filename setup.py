@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Djam',
-    version='0.9.7-pre.1',
+    version='0.9.7',
     author='AmvTek developers',
     author_email='devel@amvtek.com',
     license='MIT',
