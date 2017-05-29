@@ -14,11 +14,17 @@ import re
 import string
 from email.mime.image import MIMEImage
 
-from django.template import Context
+import django
 from django.template.loader import get_template
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.utils.encoding import force_text, force_bytes
 from django.utils import translation
+
+# overcome deprecation of Context in django 1.8+
+if django.VERSION >= (1, 8, 0):
+    Context = dict
+else:
+    from django.template import Context
 
 class InlineImage(MIMEImage):
     """
